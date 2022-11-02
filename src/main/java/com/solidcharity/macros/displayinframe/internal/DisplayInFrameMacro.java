@@ -158,7 +158,8 @@ public class DisplayInFrameMacro extends AbstractIncludeMacro<DisplayInFrameMacr
         spanBlock.setParameter("class", "DisplayInFrame");
         spanBlock.setParameter("source", source);
         spanBlock.setParameter("href", link);
-        spanBlock.setParameter("onclick", "window.open('" + link + "')");
+        // this would always open the link, even if you click a link inside
+        // spanBlock.setParameter("onclick", "window.open('" + link + "')");
 
         // Step 6: Wrap Blocks in a MetaDataBlock with the "source" meta data specified so that we know from where the
         // content comes and "base" meta data so that reference are properly resolved

@@ -37,7 +37,7 @@ on the server:
     # restart the tomcat
     ~/bin/restart.sh
 
-## CSS
+## CSS & Javascript
 
 As a user with advanced permissions, create a page, and add an object of class StyleSheetExtension.
 
@@ -53,5 +53,26 @@ span.DisplayInFrame {
   display: block;
   border: 1rem solid lightgreen;
   cursor: pointer;
+}
+```
+
+Also add an object of class JavaScriptExtension.
+
+* Use this extension: on this wiki
+* Parse Content: Yes
+* Caching Policy: Long
+
+Code:
+
+```
+var coll = document.getElementsByClassName("DisplayInFrame");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function(e) {
+    if (e.target.tagName === "SPAN") {
+      window.open(this.getAttribute('href'));
+    }
+  });
 }
 ```
