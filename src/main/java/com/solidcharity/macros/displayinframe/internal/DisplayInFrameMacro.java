@@ -152,12 +152,13 @@ public class DisplayInFrameMacro extends AbstractIncludeMacro<DisplayInFrameMacr
         // Serialize the document reference since that's what is expected in those properties
         // TODO: add support for more generic source and base reference (object property reference, etc.)
         String source = this.defaultEntityReferenceSerializer.serialize(documentBridge.getDocumentReference());
+        String link = source.replace("xwiki:", "/bin/view/").replace('.', '/');
 
         FormatBlock spanBlock = new FormatBlock(contentBlocks, Format.NONE);
         spanBlock.setParameter("class", "DisplayInFrame");
         spanBlock.setParameter("source", source);
-        spanBlock.setParameter("href", source.replace("xwiki:", "/bin/view/"));
-        spanBlock.setParameter("onclick", "window.open('" + source.replace("xwiki:", "/bin/view/") + "')");
+        spanBlock.setParameter("href", link);
+        spanBlock.setParameter("onclick", "window.open('" + link + "')");
 
         // Step 6: Wrap Blocks in a MetaDataBlock with the "source" meta data specified so that we know from where the
         // content comes and "base" meta data so that reference are properly resolved
