@@ -30,31 +30,31 @@ import org.xwiki.rendering.block.WordBlock;
 import org.xwiki.rendering.block.ParagraphBlock;
 import org.xwiki.rendering.macro.AbstractMacro;
 import org.xwiki.rendering.macro.MacroExecutionException;
-import com.solidcharity.macros.displayinframe.ExampleMacroParameters;
+import com.solidcharity.macros.displayinframe.DisplayInFrameMacroParameters;
 import org.xwiki.rendering.transformation.MacroTransformationContext;
 
 /**
- * Example Macro.
+ * DisplayInFrame Macro.
  */
 @Component
-@Named("example")
-public class ExampleMacro extends AbstractMacro<ExampleMacroParameters>
+@Named("displayinframe")
+public class DisplayInFrameMacro extends AbstractMacro<DisplayInFrameMacroParameters>
 {
     /**
      * The description of the macro.
      */
-    private static final String DESCRIPTION = "Example Macro";
+    private static final String DESCRIPTION = "DisplayInFrame Macro";
     
     /**
      * Create and initialize the descriptor of the macro.
      */
-    public ExampleMacro()
+    public DisplayInFrameMacro()
     {
-        super("Example", DESCRIPTION, ExampleMacroParameters.class);
+        super("DisplayInFrame", DESCRIPTION, DisplayInFrameMacroParameters.class);
     }
 
     @Override
-    public List<Block> execute(ExampleMacroParameters parameters, String content, MacroTransformationContext context)
+    public List<Block> execute(DisplayInFrameMacroParameters parameters, String content, MacroTransformationContext context)
         throws MacroExecutionException
     {
         List<Block> result;

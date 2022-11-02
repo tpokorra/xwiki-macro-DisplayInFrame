@@ -1,1 +1,1 @@
-com.solidcharity.macros.displayinframe.internal.ExampleMacro
+com.solidcharity.macros.displayinframe.internal.DisplayInFrameMacro

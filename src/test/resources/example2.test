@@ -3,7 +3,7 @@
 .input|xwiki/2.1
 .# Test the macro in inline mode
 .#-----------------------------------------------------
-This is inline {{example parameter="hello"/}}
+This is inline {{displayinframe parameter="hello"/}}
 .#-----------------------------------------------------
 .expect|xhtml/1.0
 .#-----------------------------------------------------
@@ -19,8 +19,8 @@ onWord [is]
 onSpace
 onWord [inline]
 onSpace
-beginMacroMarkerInline [example] [parameter=hello]
+beginMacroMarkerInline [displayinframe] [parameter=hello]
 onWord [hello]
-endMacroMarkerInline [example] [parameter=hello]
+endMacroMarkerInline [displayinframe] [parameter=hello]
 endParagraph
 endDocument

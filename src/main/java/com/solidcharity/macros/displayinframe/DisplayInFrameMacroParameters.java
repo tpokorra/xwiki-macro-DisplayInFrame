@@ -23,9 +23,9 @@ import org.xwiki.properties.annotation.PropertyMandatory;
 import org.xwiki.properties.annotation.PropertyDescription;
 
 /**
- * Parameters for the {@link com.solidcharity.macros.displayinframe.internal.ExampleMacro} Macro.
+ * Parameters for the {@link com.solidcharity.macros.displayinframe.internal.DisplayInFrameMacro} Macro.
  */
-public class ExampleMacroParameters
+public class DisplayInFrameMacroParameters
 {
     /**
      * @see {@link #getParameter()}
