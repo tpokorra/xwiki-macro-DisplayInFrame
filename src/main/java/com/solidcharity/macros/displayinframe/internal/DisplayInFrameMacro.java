@@ -19,31 +19,44 @@
  */
 package com.solidcharity.macros.displayinframe.internal;
 
-import javax.inject.Named;
-
+import java.util.Collections;
 import java.util.List;
-import java.util.Arrays;
+import java.util.Set;
+import java.util.Stack;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+import org.xwiki.bridge.DocumentModelBridge;
 import org.xwiki.component.annotation.Component;
+import org.xwiki.display.internal.DocumentDisplayerParameters;
+import org.xwiki.model.reference.EntityReference;
 import org.xwiki.rendering.block.Block;
-import org.xwiki.rendering.block.WordBlock;
-import org.xwiki.rendering.block.ParagraphBlock;
-import org.xwiki.rendering.macro.AbstractMacro;
+import org.xwiki.rendering.block.MetaDataBlock;
+import org.xwiki.rendering.block.XDOM;
+import org.xwiki.rendering.internal.macro.include.AbstractIncludeMacro;
+import org.xwiki.rendering.listener.MetaData;
 import org.xwiki.rendering.macro.MacroExecutionException;
-import com.solidcharity.macros.displayinframe.DisplayInFrameMacroParameters;
 import org.xwiki.rendering.transformation.MacroTransformationContext;
+import org.xwiki.security.authorization.Right;
+
+import com.solidcharity.macros.displayinframe.DisplayInFrameMacroParameters;
 
 /**
  * DisplayInFrame Macro.
+ * very similar to the Display Macro, but it displays a frame and links to the original page.
+ * see original: https://github.com/xwiki/xwiki-platform/blob/master/xwiki-platform-core/xwiki-platform-display/xwiki-platform-display-macro/
  */
 @Component
 @Named("displayinframe")
-public class DisplayInFrameMacro extends AbstractMacro<DisplayInFrameMacroParameters>
+public class DisplayInFrameMacro extends AbstractIncludeMacro<DisplayInFrameMacroParameters>
 {
+    private static final String DISPLAY = "displayinframe";
+
     /**
      * The description of the macro.
      */
-    private static final String DESCRIPTION = "DisplayInFrame Macro";
+    private static final String DESCRIPTION = "Display other pages into the current page inside a frame.";
     
     /**
      * Create and initialize the descriptor of the macro.
@@ -51,31 +64,96 @@ public class DisplayInFrameMacro extends AbstractMacro<DisplayInFrameMacroParame
     public DisplayInFrameMacro()
     {
         super("DisplayInFrame", DESCRIPTION, DisplayInFrameMacroParameters.class);
-    }
 
-    @Override
-    public List<Block> execute(DisplayInFrameMacroParameters parameters, String content, MacroTransformationContext context)
-        throws MacroExecutionException
-    {
-        List<Block> result;
-
-        List<Block> wordBlockAsList = Arrays.<Block>asList(new WordBlock(parameters.getParameter()));
-
-        // Handle both inline mode and standalone mode.
-        if (context.isInline()) {
-            result = wordBlockAsList;
-        } else {
-            // Wrap the result in a Paragraph Block since a WordBlock is an inline element and it needs to be
-            // inside a standalone block.
-            result = Arrays.<Block>asList(new ParagraphBlock(wordBlockAsList));
-        }
-
-        return result;
+        // The display macro must execute first since if it runs with the current context it needs to bring
+        // all the macros from the displayed page before the other macros are executed.
+        setPriority(10);
+        // for 14.6, see https://www.xwiki.org/xwiki/bin/view/ReleaseNotes/Data/XWiki/14.6:
+        // setDefaultCategories(Set.of(DEFAULT_CATEGORY_CONTENT));
+        // for 13.10:
+        setDefaultCategory(DEFAULT_CATEGORY_CONTENT);
     }
 
     @Override
     public boolean supportsInlineMode()
     {
         return true;
+    }
+
+    @Override
+    public List<Block> execute(DisplayInFrameMacroParameters parameters, String content, MacroTransformationContext context)
+        throws MacroExecutionException
+    {
+        // Step 1: Perform checks.
+        EntityReference displayedReference = resolve(context.getCurrentMacroBlock(), parameters.getReference(),
+            parameters.getType(), DISPLAY);
+        checkRecursion(displayedReference, DISPLAY);
+
+        // Step 2: Retrieve the document to display.
+        DocumentModelBridge documentBridge;
+        try {
+            documentBridge = this.documentAccessBridge.getDocumentInstance(displayedReference);
+        } catch (Exception e) {
+            throw new MacroExecutionException(
+                "Failed to load Document [" + this.defaultEntityReferenceSerializer.serialize(displayedReference) + "]",
+                e);
+        }
+
+        // Step 3: Check right
+        if (!this.authorization.hasAccess(Right.VIEW, documentBridge.getDocumentReference())) {
+            throw new MacroExecutionException(
+                String.format("Current user [%s] doesn't have view rights on document [%s]",
+                    this.documentAccessBridge.getCurrentUserReference(), documentBridge.getDocumentReference()));
+        }
+
+        // Step 4: Display the content of the displayed document.
+        // Display the content in an isolated execution and transformation context.
+        DocumentDisplayerParameters displayParameters = new DocumentDisplayerParameters();
+        displayParameters.setContentTransformed(true);
+        displayParameters.setExecutionContextIsolated(displayParameters.isContentTransformed());
+        displayParameters.setSectionId(parameters.getSection());
+        displayParameters.setTransformationContextIsolated(displayParameters.isContentTransformed());
+        displayParameters.setTargetSyntax(context.getTransformationContext().getTargetSyntax());
+        displayParameters.setContentTranslated(true);
+        if (context.getXDOM() != null) {
+            displayParameters.setIdGenerator(context.getXDOM().getIdGenerator());
+        }
+
+        Stack<Object> references = this.macrosBeingExecuted.get();
+        if (references == null) {
+            references = new Stack<>();
+            this.macrosBeingExecuted.set(references);
+        }
+        references.push(documentBridge.getDocumentReference());
+
+        XDOM result;
+        try {
+            result = this.documentDisplayer.display(documentBridge, displayParameters);
+        } catch (Exception e) {
+            throw new MacroExecutionException(e.getMessage(), e);
+        } finally {
+            references.pop();
+            if (references.isEmpty()) {
+                // Get rid of the current ThreadLocal if not needed anymore
+                this.macrosBeingExecuted.remove();
+            }
+        }
+
+        // Step 5: If the user has asked for it, remove both Section and Heading Blocks if the first displayed block is
+        // a Section block with a Heading block inside.
+        if (parameters.isExcludeFirstHeading()) {
+            excludeFirstHeading(result);
+        }
+
+        // Step 6: Wrap Blocks in a MetaDataBlock with the "source" meta data specified so that we know from where the
+        // content comes and "base" meta data so that reference are properly resolved
+        MetaDataBlock metadata = new MetaDataBlock(result.getChildren(), result.getMetaData());
+        // Serialize the document reference since that's what is expected in those properties
+        // TODO: add support for more generic source and base reference (object property reference, etc.)
+        String source = this.defaultEntityReferenceSerializer.serialize(documentBridge.getDocumentReference());
+        metadata.getMetaData().addMetaData(MetaData.SOURCE, source);
+        metadata.getMetaData().addMetaData(MetaData.BASE, source);
+
+        return Collections.singletonList(metadata);
     }
 }

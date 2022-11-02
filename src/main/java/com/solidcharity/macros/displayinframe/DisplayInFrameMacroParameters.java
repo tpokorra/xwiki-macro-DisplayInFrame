@@ -19,8 +19,16 @@
  */
 package com.solidcharity.macros.displayinframe;
 
-import org.xwiki.properties.annotation.PropertyMandatory;
+import org.xwiki.model.EntityType;
+import org.xwiki.model.reference.EntityReferenceString;
+import org.xwiki.model.reference.PageReference;
+import org.xwiki.properties.annotation.PropertyAdvanced;
 import org.xwiki.properties.annotation.PropertyDescription;
+import org.xwiki.properties.annotation.PropertyDisplayHidden;
+import org.xwiki.properties.annotation.PropertyDisplayType;
+import org.xwiki.properties.annotation.PropertyFeature;
+import org.xwiki.properties.annotation.PropertyGroup;
+import org.xwiki.properties.annotation.PropertyName;
 
 /**
  * Parameters for the {@link com.solidcharity.macros.displayinframe.internal.DisplayInFrameMacro} Macro.
@@ -28,25 +36,126 @@ import org.xwiki.properties.annotation.PropertyDescription;
 public class DisplayInFrameMacroParameters
 {
     /**
-     * @see {@link #getParameter()}
+     * @see #getReference()
      */
-    private String parameter;
+    private String reference;
 
     /**
-     * @return the example parameter
+     * @see #getType()
      */
-    public String getParameter()
-    {
-        return this.parameter;
-    }
-    
+    private EntityType type = EntityType.DOCUMENT;
+
     /**
-     * @param parameter the example parameter
+     * @see #getSection()
      */
-    @PropertyMandatory
-    @PropertyDescription("Example parameter")
-    public void setParameter(String parameter)
+    private String section;
+
+    /**
+     * @see #isExcludeFirstHeading()
+     */
+    private boolean excludeFirstHeading;
+
+    /**
+     * @param reference the reference to display
+     * @since 3.4M1
+     */
+    @PropertyDescription("the reference of the resource to display")
+    @PropertyGroup("stringReference")
+    @PropertyFeature("reference")
+    @PropertyDisplayType(EntityReferenceString.class)
+    public void setReference(String reference)
     {
-        this.parameter = parameter;
+        this.reference = reference;
+    }
+
+    /**
+     * @return the reference of the resource to display
+     * @since 3.4M1
+     */
+    public String getReference()
+    {
+        return this.reference;
+    }
+
+    /**
+     * @return the type of the reference
+     * @since 3.4M1
+     */
+    @PropertyDescription("the type of the reference")
+    @PropertyGroup("stringReference")
+    @PropertyAdvanced
+    // Marking it as Display Hidden because it's complex and we don't want to confuse our users.
+    @PropertyDisplayHidden
+    public EntityType getType()
+    {
+        return this.type;
+    }
+
+    /**
+     * @param type the type of the reference
+     * @since 3.4M1
+     */
+    public void setType(EntityType type)
+    {
+        this.type = type;
+    }
+
+    /**
+     * @param sectionId see {@link #getSection()}
+     */
+    @PropertyDescription("an optional id of a section to display in the specified document, e.g. 'HMyHeading'")
+    @PropertyAdvanced
+    public void setSection(String sectionId)
+    {
+        this.section = sectionId;
+    }
+
+    /**
+     * @return the optional id of a section to include in the referenced document. If not specified the whole document
+     *         is included.
+     */
+    public String getSection()
+    {
+        return this.section;
+    }
+
+    /**
+     * @param excludeFirstHeading {@code true} to remove the first heading found inside
+     *        the document or the section, {@code false} to keep it
+     * @since 12.4RC1
+     */
+    @PropertyName("Exclude First Heading")
+    @PropertyDescription("Exclude the first heading from the displayed document or section.")
+    @PropertyAdvanced
+    public void setExcludeFirstHeading(boolean excludeFirstHeading)
+    {
+        this.excludeFirstHeading = excludeFirstHeading;
+    }
+
+    /**
+     * @return whether to exclude the first heading from the displayed document or section, or not.
+     * @since 12.4RC1
+     */
+    public boolean isExcludeFirstHeading()
+    {
+        return this.excludeFirstHeading;
+    }
+
+    /**
+     * @param page the reference of the page to display
+     * @since 10.6RC1
+     */
+    @PropertyDescription("The reference of the page to display")
+    @PropertyFeature("reference")
+    @PropertyDisplayType(PageReference.class)
+    // Display hidden because we don't want to confuse our users by proposing two ways to enter the reference to
+    // display and ATM we don't have a picker for PageReference types and we do have a picker for EntityReference string
+    // one so we choose to keep the other one visible and hide this one. We're keeping the property so that we don't
+    // break backward compatibility when using the macro in wiki edit mode.
+    @PropertyDisplayHidden
+    public void setPage(String page)
+    {
+        this.reference = page;
+        this.type = EntityType.PAGE;
     }
 }
