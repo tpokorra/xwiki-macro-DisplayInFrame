@@ -14,15 +14,19 @@ The code has been copied and extended, to have a span with class "DisplayInFrame
 
 Preparation:
 
-   sudo apt-get install maven
-   mkdir -p ~/.m2
-   vi ~/.m2/settings.xml # insert the content of https://dev.xwiki.org/xwiki/bin/view/Community/Building/#HInstallingMaven
+    sudo apt-get install maven
+    mkdir -p ~/.m2
+    vi ~/.m2/settings.xml # insert the content of https://dev.xwiki.org/xwiki/bin/view/Community/Building/#HInstallingMaven
 
+Update for new XWiki release:
+
+    edit the file pom.xml!
 
 This package does not have valid tests yet:
 
     cd xwiki-macro-DisplayInFrame
     mvn install  -Dmaven.test.skip=true
+    # see the result in target/DisplayInFrame-13.10.9.jar
 
 ## Deploy
 
