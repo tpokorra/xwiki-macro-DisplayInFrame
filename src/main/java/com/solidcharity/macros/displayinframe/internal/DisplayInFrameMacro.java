@@ -32,9 +32,11 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.display.internal.DocumentDisplayerParameters;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.rendering.block.Block;
+import org.xwiki.rendering.block.FormatBlock;
 import org.xwiki.rendering.block.MetaDataBlock;
 import org.xwiki.rendering.block.XDOM;
 import org.xwiki.rendering.internal.macro.include.AbstractIncludeMacro;
+import org.xwiki.rendering.listener.Format;
 import org.xwiki.rendering.listener.MetaData;
 import org.xwiki.rendering.macro.MacroExecutionException;
 import org.xwiki.rendering.transformation.MacroTransformationContext;
@@ -126,9 +128,9 @@ public class DisplayInFrameMacro extends AbstractIncludeMacro<DisplayInFrameMacr
         }
         references.push(documentBridge.getDocumentReference());
 
-        XDOM result;
+        XDOM xdom;
         try {
-            result = this.documentDisplayer.display(documentBridge, displayParameters);
+            xdom = this.documentDisplayer.display(documentBridge, displayParameters);
         } catch (Exception e) {
             throw new MacroExecutionException(e.getMessage(), e);
         } finally {
@@ -142,12 +144,17 @@ public class DisplayInFrameMacro extends AbstractIncludeMacro<DisplayInFrameMacr
         // Step 5: If the user has asked for it, remove both Section and Heading Blocks if the first displayed block is
         // a Section block with a Heading block inside.
         if (parameters.isExcludeFirstHeading()) {
-            excludeFirstHeading(result);
+            excludeFirstHeading(xdom);
         }
+
+        List<Block> contentBlocks = List.of(new MetaDataBlock(xdom.getChildren(), xdom.getMetaData()));
+
+        FormatBlock spanBlock = new FormatBlock(contentBlocks, Format.NONE);
+        spanBlock.setParameter("class","DisplayInFrame");
 
         // Step 6: Wrap Blocks in a MetaDataBlock with the "source" meta data specified so that we know from where the
         // content comes and "base" meta data so that reference are properly resolved
-        MetaDataBlock metadata = new MetaDataBlock(result.getChildren(), result.getMetaData());
+        MetaDataBlock metadata = new MetaDataBlock(Collections.<Block>singletonList(spanBlock));
         // Serialize the document reference since that's what is expected in those properties
         // TODO: add support for more generic source and base reference (object property reference, etc.)
         String source = this.defaultEntityReferenceSerializer.serialize(documentBridge.getDocumentReference());
