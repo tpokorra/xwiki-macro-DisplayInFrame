@@ -32,7 +32,7 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.display.internal.DocumentDisplayerParameters;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.rendering.block.Block;
-import org.xwiki.rendering.block.SectionBlock;
+import org.xwiki.rendering.block.GroupBlock;
 import org.xwiki.rendering.block.MetaDataBlock;
 import org.xwiki.rendering.block.XDOM;
 import org.xwiki.rendering.internal.macro.include.AbstractIncludeMacro;
@@ -154,7 +154,7 @@ public class DisplayInFrameMacro extends AbstractIncludeMacro<DisplayInFrameMacr
         String source = this.defaultEntityReferenceSerializer.serialize(documentBridge.getDocumentReference());
         String link = source.replace("xwiki:", "/bin/view/").replace('.', '/');
 
-        SectionBlock divBlock = new SectionBlock(contentBlocks);
+        GroupBlock divBlock = new GroupBlock(contentBlocks);
         divBlock.setParameter("class", "DisplayInFrame");
         divBlock.setParameter("source", source);
         divBlock.setParameter("href", link);
