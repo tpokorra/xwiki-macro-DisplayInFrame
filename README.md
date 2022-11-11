@@ -3,7 +3,7 @@
 ## Purpose
 
 This macro is very similar to the "Display Macro".
-The code has been copied and extended, to have a span with class "DisplayInFrame", and with an onclick event to open the displayed page.
+The code has been copied and extended, to have a div with class "DisplayInFrame", and with an onclick event to open the displayed page.
 
 ## Display Macro
 
@@ -49,7 +49,7 @@ As a user with advanced permissions, create a page, and add an object of class S
 Code:
 
 ```
-span.DisplayInFrame {
+div.DisplayInFrame {
   display: block;
   border: 1rem solid lightgreen;
   cursor: pointer;
@@ -70,7 +70,7 @@ var i;
 
 for (i = 0; i < coll.length; i++) {
   coll[i].addEventListener("click", function(e) {
-    if (e.target.tagName === "SPAN") {
+    if (e.target.tagName === "DIV") {
       window.open(this.getAttribute('href'));
     }
   });

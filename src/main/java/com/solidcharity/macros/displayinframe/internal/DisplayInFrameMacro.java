@@ -32,7 +32,7 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.display.internal.DocumentDisplayerParameters;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.rendering.block.Block;
-import org.xwiki.rendering.block.FormatBlock;
+import org.xwiki.rendering.block.SectionBlock;
 import org.xwiki.rendering.block.MetaDataBlock;
 import org.xwiki.rendering.block.XDOM;
 import org.xwiki.rendering.internal.macro.include.AbstractIncludeMacro;
@@ -154,16 +154,16 @@ public class DisplayInFrameMacro extends AbstractIncludeMacro<DisplayInFrameMacr
         String source = this.defaultEntityReferenceSerializer.serialize(documentBridge.getDocumentReference());
         String link = source.replace("xwiki:", "/bin/view/").replace('.', '/');
 
-        FormatBlock spanBlock = new FormatBlock(contentBlocks, Format.NONE);
-        spanBlock.setParameter("class", "DisplayInFrame");
-        spanBlock.setParameter("source", source);
-        spanBlock.setParameter("href", link);
+        SectionBlock divBlock = new SectionBlock(contentBlocks);
+        divBlock.setParameter("class", "DisplayInFrame");
+        divBlock.setParameter("source", source);
+        divBlock.setParameter("href", link);
         // this would always open the link, even if you click a link inside
-        // spanBlock.setParameter("onclick", "window.open('" + link + "')");
+        // divBlock.setParameter("onclick", "window.open('" + link + "')");
 
         // Step 6: Wrap Blocks in a MetaDataBlock with the "source" meta data specified so that we know from where the
         // content comes and "base" meta data so that reference are properly resolved
-        MetaDataBlock metadata = new MetaDataBlock(Collections.<Block>singletonList(spanBlock));
+        MetaDataBlock metadata = new MetaDataBlock(Collections.<Block>singletonList(divBlock));
         metadata.getMetaData().addMetaData(MetaData.SOURCE, source);
         metadata.getMetaData().addMetaData(MetaData.BASE, source);
 
