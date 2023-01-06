@@ -24,12 +24,12 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.solidcharity</groupId>
   <artifactId>DisplayInFrame</artifactId>
-  <version>13.10.10</version>
+  <version>13.10.11</version>
   <name>XWiki Macro - DisplayInFrame</name>
   <description>XWiki Macro - DisplayInFrame</description>
   <properties>
-    <rendering.version>13.10.10</rendering.version>
-    <commons.version>13.10.10</commons.version>
+    <rendering.version>13.10.11</rendering.version>
+    <commons.version>13.10.11</commons.version>
   </properties>
   <build>
     <plugins>
