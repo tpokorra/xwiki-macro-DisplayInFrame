@@ -71,9 +71,9 @@ public class DisplayInFrameMacro extends AbstractIncludeMacro<DisplayInFrameMacr
         // all the macros from the displayed page before the other macros are executed.
         setPriority(10);
         // for 14.6, see https://www.xwiki.org/xwiki/bin/view/ReleaseNotes/Data/XWiki/14.6:
-        // setDefaultCategories(Set.of(DEFAULT_CATEGORY_CONTENT));
+        setDefaultCategories(Set.of(DEFAULT_CATEGORY_CONTENT));
         // for 13.10:
-        setDefaultCategory(DEFAULT_CATEGORY_CONTENT);
+        // setDefaultCategory(DEFAULT_CATEGORY_CONTENT);
     }
 
     @Override
