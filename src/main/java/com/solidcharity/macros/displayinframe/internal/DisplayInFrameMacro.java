@@ -102,7 +102,7 @@ public class DisplayInFrameMacro extends AbstractIncludeMacro<DisplayInFrameMacr
         }
 
         // Step 3: Check right
-        if (!this.authorization.hasAccess(Right.VIEW, documentBridge.getDocumentReference())) {
+        if (!this.contextualAuthorization.hasAccess(Right.VIEW, documentBridge.getDocumentReference())) {
             throw new MacroExecutionException(
                 String.format("Current user [%s] doesn't have view rights on document [%s]",
                     this.documentAccessBridge.getCurrentUserReference(), documentBridge.getDocumentReference()));
